@@ -1,0 +1,1 @@
+void matrixmulti(int A[][DIM], int B[][DIM], int C[][DIM]);
