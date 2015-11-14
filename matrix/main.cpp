@@ -13,12 +13,19 @@ int main(){
 	auto B = new int[DIM][DIM];
 	auto C = new int[DIM][DIM];
 
+	//populate the arrays A and B
 	for (int i = 0; i<DIM; i++){
 		for (int j = 0; j < DIM; j++){
 			A[i][j] = rand() % 100;
 			B[i][j] = rand() % 100;
 		}
 	}
+	
+
 	matrixmulti(A,B,C);
 
+	//delete arrays before exiting
+	delete[]A;
+	delete[]B;
+	delete[]C;
 }
