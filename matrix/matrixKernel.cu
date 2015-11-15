@@ -22,6 +22,10 @@ __global__ void multi(int *A, int *B, int *C)
 void matrixmulti(int A[][DIM],int B[][DIM],int C[][DIM]){
 	int *dev_a, *dev_b, *dev_c;
 
+	cudaEvent_t start, stop;
+	cudaEventCreate(&start);
+	cudaEventCreate(&stop);
+
 	//allocate memory on global memory of gpu
 	cudaError_t err = cudaMalloc((void**)&dev_a, ((DIM)*(DIM))*sizeof(int));
 	printf("Cuda malloc A:%s \n", cudaGetErrorString(err));
@@ -40,19 +44,25 @@ void matrixmulti(int A[][DIM],int B[][DIM],int C[][DIM]){
 	//two dimension threads
 	dim3 dimBlock(BlockSize, BlockSize);
 	dim3 dimGrid((DIM + dimBlock.x - 1) / dimBlock.x, (DIM + dimBlock.y - 1) / dimBlock.y);
-
+	
 	//call the kernel function multi
+	cudaEventRecord(start);
 	multi << < dimGrid, dimBlock >> >(dev_a, dev_b, dev_c);
+	cudaEventRecord(stop);
 
 	//retrieve array C from device memory
 	err = cudaMemcpy(C, dev_c, ((DIM*DIM))*sizeof(int), cudaMemcpyDeviceToHost);
 	printf("Cuda memcpy to HOST C:%s \n", cudaGetErrorString(err));
+	cudaEventSynchronize(stop);
+	float milliseconds = 0;
+	cudaEventElapsedTime(&milliseconds, start, stop);
+	printf("Elapsed time is %f ms\n", milliseconds);
 
-	for (int i = 0; i < DIM; i++){
+	/*for (int i = 0; i < DIM; i++){
 		for (int j = 0; j < DIM; j++){
 			printf("C(%d,%d) = %d \n", i, j, C[i][j]);
 		}
-	}
+	}*/
 
 	//free the memory
 	cudaFree(dev_a);
